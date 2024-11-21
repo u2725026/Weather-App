@@ -13,35 +13,53 @@
 <body>
     <section class="hero is-primary is-bold">
         <div class="hero-body">
-            <div class="container">
-                <h1 class="title">
-                    What's the weather like?
-                </h1>
-                <div>
-                    <h1>Based on your location</h1>
-                    <!-- Start of geo location based weather data div -->
-                    <div class="media">
-                        <article class="media">
-                            <div class="media-left">
-                                <figure class="image is-50x50">
-                                    <img src="http://openweathermap.org/img/w/{{ location['weather'][0]['icon']}}.png" alt="Image">
-                                </figure>
-                            </div>
-                            <div class="media-content">
-                                <div class="content">
-                                    <p>
-                                        <span class="title">{{ location["name"] }}</span>
-                                        <br>
-                                        <span class="subtitle">{{ location["main"]["temp"] }}° C</span>
-                                        <br> {{ location['weather'][0]['description'] }}
+            <section class="section">
+                <div class="container">
+                    <h1 class="title has-text-centered">What's the weather like?</h1>
+                    <div class="columns is-variable is-8">
+                        <!-- Left Column: Geolocation-based Weather -->
+                        <div class="column">
+                            <h2 class="subtitle">Based on your location</h2>
+                            <div class="media">
+                                <figure class="media-left">
+                                    <p class="image is-64x64">
+                                        <img src="http://openweathermap.org/img/w/{{ location['weather'][0]['icon'] }}.png" alt="Weather Icon">
                                     </p>
+                                </figure>
+                                <div class="media-content">
+                                    <p>{{date}}</p>
+                                    <div class="content">
+                                        <p>
+                                            <strong class="is-size-4">{{ location["name"] }}</strong>
+                                            <br>
+                                            <span class="is-size-5 has-text-weight-semibold">{{ location["main"]["temp"] }}° C</span>
+                                            <br>
+                                            <small>{{ location['weather'][0]['description'] }}</small>
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
-                        </article>
+                        </div>
+        
+                        <!-- Right Column: 7-Day Weather Forecast -->
+                        <div class="column">
+                            <h2 class="subtitle">7-Day Forecast</h2>
+                            <div class="content">
+                                {% for day, temperature in week.items() %}
+                                <div class="">
+                                    <p class="">
+                                        <strong>{{ day }}</strong>: {{ temperature["day"] }}° C 
+                                    </p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="column">
+                            <p>This is a suggestion</p>
+                        </div>
                     </div>
-                    <!-- End of geo location based weather data div -->
                 </div>
-            </div>
+            </section>
         </div>
     </section>
     <section class="section">

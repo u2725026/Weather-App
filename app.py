@@ -2,6 +2,7 @@ import requests
 import string
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime, timedelta
 
 # Token to get location  for ip info
 token = "81ebde365bc0dd"
@@ -39,6 +40,13 @@ def get_weather_data(city):
     return r
 
 
+def get_one_week_data(city):
+    url = f"https://api.openweathermap.org/data/2.5/forecast/daily?q={city}&units=metric&cnt=7&appid=a67dc9788b42ec743f9ea12b1a6f8bcc"
+    r = requests.get(url).json()
+    # print(r)
+    return r
+
+
 @app.route("/")
 def index_get():
     user_ip = public_ip()
@@ -47,8 +55,29 @@ def index_get():
     cities = City.query.all()
 
     weather_data = []
-
+    # Weather based on geo location
     geo_data = get_weather_data(location["city"])
+
+    # time based on geo location
+    offset = geo_data["timezone"]
+    utc_stamp = geo_data["dt"]
+    utc_time = datetime.fromtimestamp(utc_stamp)
+    local_time = utc_time + timedelta(seconds=offset)
+    date = local_time.strftime("%A, %d %B, %Y")
+    print(date)
+    # one week data
+    one_week_data = get_one_week_data(location["city"])["list"]
+    data = {
+        datetime.fromtimestamp(day["dt"]).strftime("%A"): day["temp"]
+        for day in one_week_data
+    }
+
+    print(geo_data)
+
+    print(one_week_data[0]["weather"][0]["icon"])
+
+    icons = [icon["weather"][0]["icon"] for icon in one_week_data]
+    print(icons)
 
     for city in cities:
         r = get_weather_data(city.name)
@@ -60,7 +89,14 @@ def index_get():
         }
         weather_data.append(weather)
 
-    return render_template("weather.html", weather_data=weather_data, location=geo_data)
+    return render_template(
+        "weather.html",
+        weather_data=weather_data,
+        location=geo_data,
+        week=data,
+        date=date,
+        icons=icons,
+    )
 
 
 @app.route("/", methods=["POST"])
