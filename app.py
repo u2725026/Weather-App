@@ -69,7 +69,7 @@ def index_get():
     one_week_data = get_one_week_data(location["city"])["list"]
     data = {
         datetime.fromtimestamp(day["dt"]).strftime("%A"): day["temp"]
-        for day in one_week_data
+        for day in one_week_data[1::]
     }
 
     # Suggestions based on weather conditions
