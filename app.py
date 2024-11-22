@@ -1,8 +1,8 @@
-import requests
-import string
+import requests, string
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
+from suggestion import Suggestion
 
 # Token to get location  for ip info
 token = "81ebde365bc0dd"
@@ -64,7 +64,7 @@ def index_get():
     utc_time = datetime.fromtimestamp(utc_stamp)
     local_time = utc_time + timedelta(seconds=offset)
     date = local_time.strftime("%A, %d %B, %Y")
-    print(date)
+
     # one week data
     one_week_data = get_one_week_data(location["city"])["list"]
     data = {
@@ -72,12 +72,11 @@ def index_get():
         for day in one_week_data
     }
 
-    print(geo_data)
-
-    print(one_week_data[0]["weather"][0]["icon"])
-
-    icons = [icon["weather"][0]["icon"] for icon in one_week_data]
-    print(icons)
+    # Suggestions based on weather conditions
+    suggestion = Suggestion(
+        geo_data["weather"][0]["description"], geo_data["main"]["temp"]
+    ).suggestion
+    print(geo_data["weather"][0]["description"], suggestion)
 
     for city in cities:
         r = get_weather_data(city.name)
@@ -95,7 +94,7 @@ def index_get():
         location=geo_data,
         week=data,
         date=date,
-        icons=icons,
+        suggestion=suggestion,
     )
 
 
