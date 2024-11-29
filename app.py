@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 from suggestion import Suggestion
+from sendemail import SendEmail
 
 # Token to get location  for ip info
 token = "81ebde365bc0dd"
@@ -13,6 +14,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///weather.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = "thisisasecret"
 db = SQLAlchemy(app)
+email = SendEmail()
 
 
 class City(db.Model):
@@ -87,6 +89,20 @@ def index_get():
             "icon": r["weather"][0]["icon"],
         }
         weather_data.append(weather)
+        extreme = [
+            "snow",
+            "mist",
+            "thunderstorm",
+            "heatwave",
+            "heavy",
+            "sleet",
+            "tornado",
+            "fog",
+            "dust",
+        ]
+        for ext in extreme:
+            if ext in weather["description"]:
+                email.sendmail(weather["city"], weather["description"])
 
     return render_template(
         "weather.html",
